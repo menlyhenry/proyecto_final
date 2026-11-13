@@ -34,6 +34,8 @@ public class PeliculaController {
     private FilteredList<Pelicula> filtered;
     private Validator validator;
 
+    private static final int DURACION_LIMITE_MIN = 1;
+
     @FXML
     public void initialize() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -43,6 +45,20 @@ public class PeliculaController {
         columns.put("Título", new ColumnInfo("titulo", 240.0));
         columns.put("Género", new ColumnInfo("genero", 150.0));
         columns.put("Duración", new ColumnInfo("duracion", 110.0));
+        tableView.setRowFactory(tv -> new TableRow<Pelicula>() {
+            @Override
+            protected void updateItem(Pelicula p, boolean empty) {
+                super.updateItem(p, empty);
+                if (empty || p == null) {
+                    setStyle("");
+                } else if (p.getDuracion() != null && p.getDuracion() > DURACION_LIMITE_MIN) {
+                    setStyle("-fx-background-color: #f8d7da; -fx-text-fill: #b00020;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+
         new TableViewHelper<Pelicula>().addColumnsInOrderWithSize(tableView, columns, this::abrirFormulario, this::eliminar);
         tableView.setTableMenuButtonVisible(true);
         paginador = new PaginadorTabla<>(tableView);
@@ -52,6 +68,8 @@ public class PeliculaController {
             aplicarFiltro(newValue);
             paginador.primeraPagina();
         });
+
+
     }
 
     private void aplicarFiltro(String texto) {
@@ -118,6 +136,7 @@ public class PeliculaController {
         grid.addRow(1, new Label("Género:"), genero);
         grid.addRow(2, new Label("Duración (min):"), duracion);
         dialog.getDialogPane().setContent(grid);
+
 
         Button botonAccion = (Button) dialog.getDialogPane().lookupButton(accion);
         botonAccion.addEventFilter(ActionEvent.ACTION, event -> {
